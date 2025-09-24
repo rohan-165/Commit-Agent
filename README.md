@@ -1,4 +1,4 @@
-# Commit-Agent
+# Commit Agent
 
 A smart Git Commit Agent that analyzes your staged changes and automatically generates a professional commit message using OpenAI.  
 It can commit and push your changes in one step, saving time and ensuring consistent commit messages.
