@@ -51,18 +51,41 @@ Diff:
         ]
     }
 
-    response = requests.post("https://api.openai.com/v1/chat/completions",
-                             headers=headers, data=json.dumps(data))
-    response_json = response.json()
+    try:
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers=headers,
+            data=json.dumps(data)
+        )
+    except Exception as e:
+        print("❌ Failed to call OpenAI API:", e)
+        sys.exit(1)
+
+    # 4. Parse response safely
+    try:
+        response_json = response.json()
+    except Exception as e:
+        print("❌ Failed to parse API response as JSON:", e)
+        print("Raw response:", response.text)
+        sys.exit(1)
+
+    # 5. Check for API errors
+    if "error" in response_json:
+        print("❌ API Error:", response_json["error"]["message"])
+        sys.exit(1)
+
+    if "choices" not in response_json or len(response_json["choices"]) == 0:
+        print("❌ Unexpected API response, 'choices' missing or empty:", response_json)
+        sys.exit(1)
 
     ai_message = response_json["choices"][0]["message"]["content"].strip()
     final_commit = f"{commit_type}: {ai_message}"
 
-    # 4. Run git commit
+    # 6. Run git commit
     subprocess.run(["git", "commit", "-m", final_commit])
     print(f"✅ Commit created:\n{final_commit}")
 
-    # 5. Push to origin
+    # 7. Push to origin
     subprocess.run(["git", "push", "origin", "HEAD"])
 
 if __name__ == "__main__":
