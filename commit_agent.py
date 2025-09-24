@@ -81,7 +81,8 @@ Diff:
     if "choices" not in response_json or len(response_json["choices"]) == 0:
         print("❌ Unexpected API response, 'choices' missing or empty:", response_json)
         sys.exit(1)
-
+        
+    print("✅ Received response from OpenAI API :", response_json)
     ai_message = response_json["choices"][0]["message"]["content"].strip()
     final_commit = f"{commit_type}: {ai_message}"
 
