@@ -83,7 +83,7 @@ Diff:
         sys.exit(1)
 
     ai_message = response_json["choices"][0]["message"]["content"].strip()
-    final_commit = f"{commit_type}: {ai_message}"
+    final_commit = f"[{commit_type}] {ai_message}"
 
     # 6. Run git commit
     subprocess.run(["git", "commit", "-m", final_commit])
