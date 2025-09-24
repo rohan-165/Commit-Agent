@@ -100,14 +100,5 @@ commit-agent feature "Add search functionality"
 MIT License. Free to use and modify.
 
 
----
-
-This README is:  
-- Beginner-friendly → shows setup, usage, examples  
-- Professional → explains benefits clearly  
-- Safe → warns about API keys  
-
----
-
 
 
