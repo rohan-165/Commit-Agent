@@ -10,15 +10,19 @@ def main():
         print("Example: python commit_agent.py feature 'Add login form'")
         sys.exit(1)
 
-    commit_type = sys.argv[1].upper()  # FEATURE, HOTFIX, BUG, etc.
+    commit_type = sys.argv[1].upper()  # FEAT, FIX, BUG, REFACTOR, DOCS, CHORE, etc.
     user_comment = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
+
+    # 0. Stage all changes automatically
+    subprocess.run(["git", "add", "."])
+    print("✅ All changes staged.")
 
     # 1. Get staged changes
     result = subprocess.run(["git", "diff", "--cached"], capture_output=True, text=True)
     diff = result.stdout.strip()
 
     if not diff:
-        print("❌ No staged changes. Use 'git add .' before running this.")
+        print("❌ No staged changes found after 'git add .'.")
         sys.exit(1)
 
     # 2. Load API key
