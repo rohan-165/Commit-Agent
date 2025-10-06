@@ -4,14 +4,34 @@ import sys
 import requests
 import json
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python commit_agent.py <commit_type> [optional_comment]")
-        print("Example: python commit_agent.py feature 'Add login form'")
+# Available commit types
+COMMIT_TYPES = {
+    "1": "FEAT",
+    "2": "CHORE",
+    "3": "BUG",
+    "4": "REFACTOR",
+    "5": "FIX",
+    "6": "DOCS",
+    "7": "TEST",
+    "8": "STYLE",
+    "9": "PERF"
+}
+
+def choose_commit_type():
+    print("\nSelect commit type:")
+    for key, value in COMMIT_TYPES.items():
+        print(f"{key}. {value}")
+
+    choice = input("\nEnter the number corresponding to commit type: ").strip()
+
+    if choice not in COMMIT_TYPES:
+        print("❌ Invalid selection. Please run again and choose a valid option.")
         sys.exit(1)
 
-    commit_type = sys.argv[1].upper()  # FEAT, FIX, BUG, REFACTOR, DOCS, CHORE, etc.
-    user_comment = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
+    return COMMIT_TYPES[choice]
+
+def main():
+    print("🚀 Starting Commit Agent...\n")
 
     # 0. Stage all changes automatically
     subprocess.run(["git", "add", "."])
@@ -25,23 +45,29 @@ def main():
         print("❌ No staged changes found after 'git add .'.")
         sys.exit(1)
 
-    # 2. Load API key
+    # 2. Choose commit type interactively
+    commit_type = choose_commit_type()
+
+    # 3. Optional user note
+    user_comment = input("\n📝 Optional note (press Enter to skip): ").strip()
+
+    # 4. Load API key
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         print("❌ Missing OPENAI_API_KEY environment variable.")
         sys.exit(1)
 
-    # 3. Call OpenAI API
+    # 5. Prepare OpenAI request
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
 
     prompt = f"""
-You are a professional Git commit assistant.  
-Analyze the following git diff and generate a concise commit message.  
-Commit type is: {commit_type}.  
-User extra note: {user_comment}  
+You are a professional Git commit assistant.
+Analyze the following git diff and generate a concise commit message.
+Commit type is: {commit_type}.
+User extra note: {user_comment}
 
 Diff:
 {diff}
@@ -65,7 +91,7 @@ Diff:
         print("❌ Failed to call OpenAI API:", e)
         sys.exit(1)
 
-    # 4. Parse response safely
+    # 6. Parse response safely
     try:
         response_json = response.json()
     except Exception as e:
@@ -73,7 +99,6 @@ Diff:
         print("Raw response:", response.text)
         sys.exit(1)
 
-    # 5. Check for API errors
     if "error" in response_json:
         print("❌ API Error:", response_json["error"]["message"])
         sys.exit(1)
@@ -85,12 +110,20 @@ Diff:
     ai_message = response_json["choices"][0]["message"]["content"].strip()
     final_commit = f"[{commit_type}] {ai_message}"
 
-    # 6. Run git commit
+    # 7. Confirm before committing
+    print(f"\n🧠 Suggested commit message:\n{final_commit}")
+    confirm = input("\nDo you want to proceed with this commit? (y/n): ").strip().lower()
+    if confirm != "y":
+        print("🚫 Commit cancelled.")
+        sys.exit(0)
+
+    # 8. Run git commit
     subprocess.run(["git", "commit", "-m", final_commit])
     print(f"✅ Commit created:\n{final_commit}")
 
-    # 7. Push to origin
+    # 9. Push to origin
     subprocess.run(["git", "push", "origin", "HEAD"])
+    print("🚀 Changes pushed successfully!")
 
 if __name__ == "__main__":
     main()
