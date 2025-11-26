@@ -74,7 +74,7 @@ Diff:
 """
 
     data = {
-        "model": "gpt-4o-mini",
+        "model": "gpt-4.1-mini",
         "messages": [
             {"role": "system", "content": "You are a helpful assistant that writes clean git commit messages."},
             {"role": "user", "content": prompt}
