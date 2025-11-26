@@ -56,6 +56,11 @@ def main():
     if not api_key:
         print("❌ Missing OPENAI_API_KEY environment variable.")
         sys.exit(1)
+    # 4.1 Load OPENAI Model
+    model = os.getenv("OPENAI_MODEL")
+    if not model:
+        print("❌ Missing OPENAI_MODEL environment variable.")
+        sys.exit(1)
 
     # 5. Prepare OpenAI request
     headers = {
@@ -74,7 +79,7 @@ Diff:
 """
 
     data = {
-        "model": "gpt-4.1-mini",
+        "model": model,
         "messages": [
             {"role": "system", "content": "You are a helpful assistant that writes clean git commit messages."},
             {"role": "user", "content": prompt}
